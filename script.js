@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const onlineOrderStatusEl = document.getElementById('onlineOrderStatus');
   const toastEl = document.getElementById('toast');
   const cashPaymentFieldsEl = document.getElementById('cashPaymentFields');
+  const qrisPaymentBoxEl = document.getElementById('qrisPaymentBox');
   const uangBayarFieldEl = document.getElementById('uangBayarField');
   const kembalianFieldEl = document.getElementById('kembalianField');
   const detailStrukRows = document.getElementById('detailStrukRows');
@@ -559,26 +560,35 @@ document.addEventListener('DOMContentLoaded', function () {
     return sumberTransaksi === 'web';
   }
 
+  
+  function isMetodeQris() {
+    return isTransaksiWeb() || metodeBayarEl.value === 'QRIS';
+  }
   function sinkronkanModePembayaran() {
     const transaksiWeb = isTransaksiWeb();
     const summary = getRingkasanBelanja();
+    const pembayaranQris = isMetodeQris();
 
     if (cashPaymentFieldsEl) {
-      cashPaymentFieldsEl.style.display = transaksiWeb ? 'none' : '';
+      cashPaymentFieldsEl.style.display = pembayaranQris ? 'none' : '';
     }
 
     if (uangBayarFieldEl) {
-      uangBayarFieldEl.hidden = transaksiWeb;
+      uangBayarFieldEl.hidden = pembayaranQris;
     }
 
     if (kembalianFieldEl) {
-      kembalianFieldEl.hidden = transaksiWeb;
+      kembalianFieldEl.hidden = pembayaranQris;
     }
 
-    btnHitung.style.display = transaksiWeb ? 'none' : '';
+    if (qrisPaymentBoxEl) {
+      qrisPaymentBoxEl.hidden = !pembayaranQris;
+    }
+
+    btnHitung.style.display = pembayaranQris ? 'none' : '';
     metodeBayarEl.value = transaksiWeb ? 'QRIS' : metodeBayarEl.value || 'Tunai';
 
-    if (transaksiWeb) {
+    if (pembayaranQris) {
       uangBayarEl.value = String(summary.grandTotal);
       kembalianEl.value = formatRupiah(0);
     } else if (!uangBayarEl.value) {
@@ -596,11 +606,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const summary = getRingkasanBelanja();
 
-    if (isTransaksiWeb()) {
+    if (isMetodeQris()) {
       uangBayarEl.value = String(summary.grandTotal);
       kembalianEl.value = formatRupiah(0);
       statusTransaksiEl.textContent = 'Pembayaran QRIS Selesai';
-      infoTransaksiEl.textContent = 'Pesanan web sudah dibayar pelanggan dan siap dicetak';
+      infoTransaksiEl.textContent = 'Pembayaran QRIS siap dicetak dengan kode QRIS toko';
       return;
     }
 
@@ -916,11 +926,11 @@ document.addEventListener('DOMContentLoaded', function () {
       return null;
     }
 
-    if (isTransaksiWeb()) {
+    if (isMetodeQris()) {
       uangBayarEl.value = String(summary.grandTotal);
       kembalianEl.value = formatRupiah(0);
       statusTransaksiEl.textContent = 'Pembayaran QRIS Selesai';
-      infoTransaksiEl.textContent = 'Pesanan web sudah dibayar pelanggan dan siap dicetak';
+      infoTransaksiEl.textContent = 'Pembayaran QRIS siap dicetak dengan kode QRIS toko';
       return {
         ...summary,
         sumberTransaksi,
@@ -1256,6 +1266,11 @@ document.addEventListener('DOMContentLoaded', function () {
       if (input === metodeBayarEl && isTransaksiWeb()) {
         metodeBayarEl.value = 'QRIS';
       }
+
+      if (input === metodeBayarEl) {
+        sinkronkanModePembayaran();
+        updatePembayaranOtomatis();
+      }
       simpanProfil();
     });
   });
@@ -1298,3 +1313,9 @@ document.addEventListener('DOMContentLoaded', function () {
     kembalianEl.value = formatRupiah(0);
   }
 });
+
+
+
+
+
+
