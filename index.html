@@ -218,6 +218,9 @@
               <input id="kembalian" type="text" readonly value="Rp 0">
             </label>
           </div>
+          <div id="qrisPaymentBox" class="qris-payment-box qris-only" hidden>
+            <img src="assets/qris-barcode-only.jpeg" alt="QRIS">
+          </div>
 
           <div class="actions">
             <button id="btnHitung" type="button" class="ghost">Hitung Kembalian</button>
@@ -297,10 +300,8 @@
       <p id="strukBayarRow"><strong>Bayar:</strong> <span id="strukBayar" class="num">Rp 0</span></p>
       <p id="strukKembaliRow" class="change"><strong>Uang Kembali:</strong> <span id="strukKembali" class="num">Rp 0</span></p>
       <p>_______________________</p>
-    </div>
-    <hr>
-
-    <div class="struk-footer">
+    </div>    <hr>
+<div class="struk-footer">
       <hr>
       <p>Barang yang sudah dibeli tidak dapat ditukar atau dikembalikan</p>
       <p>Terima kasih telah berbelanja di <strong id="strukStoreNamaFooter"></strong></p>
@@ -313,3 +314,9 @@
   <script defer src="app.js"></script>
 </body>
 </html>
+
+
+
+
+
+
