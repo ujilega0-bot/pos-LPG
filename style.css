@@ -744,6 +744,60 @@ tbody tr:last-child td {
 .spacer-panjang {
   height: 80mm;
 }
+.qris-payment-box {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 16px;
+  align-items: center;
+  margin: 14px 0 4px;
+  padding: 14px;
+  border: 1px solid rgba(252, 8, 8, 0.16);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.qris-payment-box[hidden],
+.struk-qris[hidden],
+#strukQrisDivider[hidden] {
+  display: none !important;
+}
+
+.qris-payment-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.qris-payment-copy strong {
+  font-size: 16px;
+}
+
+.qris-payment-copy span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.qris-payment-box img {
+  width: 100%;
+  max-width: 180px;
+  justify-self: end;
+  border: 1px solid rgba(32, 64, 58, 0.12);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.struk-qris {
+  text-align: center;
+}
+
+.struk-qris img {
+  display: block;
+  width: 52mm;
+  max-width: 100%;
+  height: auto;
+  margin: 1mm auto;
+}
 
 @media (max-width: 900px) {
   .topbar,
@@ -820,6 +874,15 @@ tbody tr:last-child td {
   label:nth-child(2),
   label:nth-child(3) {
     grid-column: span 1;
+  }
+
+  .qris-payment-box {
+    grid-template-columns: 1fr;
+  }
+
+  .qris-payment-box img {
+    justify-self: start;
+    max-width: 220px;
   }
 }
 
@@ -917,6 +980,22 @@ tbody tr:last-child td {
     margin-top: 2mm;
   }
 
+  .struk-qris {
+    text-align: center;
+  }
+
+  .struk-qris img {
+    width: 48mm !important;
+    max-width: 48mm !important;
+    height: auto !important;
+    margin: 1mm auto !important;
+  }
+
+  .struk-qris p {
+    font-size: 9px;
+    margin: 0.3mm 0;
+  }
+
   .struk-footer p {
     font-size: 9px;
     margin: 0.3mm 0;
@@ -930,4 +1009,37 @@ tbody tr:last-child td {
   .spacer-panjang {
     height: 40mm;
   }
+}
+
+
+.qris-only {
+  display: flex;
+  justify-content: center;
+  margin: 14px 0 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.qris-only img {
+  display: block;
+  width: 260px;
+  max-width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.qris-payment-box.qris-only {
+  grid-template-columns: 1fr;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.qris-payment-box.qris-only img {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  justify-self: center;
 }
