@@ -972,12 +972,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const nomor = buatNomorTransaksi();
     isiStruk(dataPembayaran, nomor);
     simpanProfil();
-    simpanRiwayat(dataPembayaran, nomor);
+    const prosesSimpan = simpanRiwayat(dataPembayaran, nomor);
     hapusTransaksiAktif();
-    tampilkanToast(cetak ? 'Struk siap dicetak.' : 'Transaksi selesai dan tersimpan.');
 
     if (cetak) {
+      tampilkanToast('Struk siap dicetak. Transaksi juga disimpan.');
       cetakStrukKhusus();
+    } else if (isSheetAktif()) {
+      tampilkanToast('Transaksi selesai. Mengirim ke Google Sheets...');
+      prosesSimpan.then((hasil) => {
+        tampilkanToast(
+          hasil === 'sheet'
+            ? 'Transaksi tersimpan ke Google Sheets.'
+            : 'Transaksi tersimpan lokal, cek koneksi Google Sheets.'
+        );
+      });
+    } else {
+      tampilkanToast('Transaksi selesai dan tersimpan lokal. Isi URL Google Sheets agar ikut tersimpan online.');
     }
 
     resetTransaksi();
@@ -1191,16 +1202,21 @@ document.addEventListener('DOMContentLoaded', function () {
     riwayatTransaksi.unshift(transaksi);
     riwayatTransaksi = riwayatTransaksi.slice(0, 20);
     simpanJSON(STORAGE_KEYS.history, riwayatTransaksi);
+    renderRiwayat();
+
     if (isSheetAktif()) {
-      googleSheetPost('appendTransaction', transaksi).then((ok) => {
+      return googleSheetPost('appendTransaction', transaksi).then((ok) => {
         setSheetStatus(
           ok
             ? `Transaksi ${nomor} terkirim ke Google Sheets.`
             : `Transaksi ${nomor} tersimpan lokal, tetapi belum terkonfirmasi di Google Sheets.`
         );
+        return ok ? 'sheet' : 'local';
       });
     }
-    renderRiwayat();
+
+    setSheetStatus('Transaksi tersimpan lokal. Isi URL Web App Google Apps Script untuk menyimpan ke Google Sheets.');
+    return Promise.resolve('local');
   }
 
   function renderTanggalHari() {
