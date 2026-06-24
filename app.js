@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const toastEl = document.getElementById('toast');
   const cashPaymentFieldsEl = document.getElementById('cashPaymentFields');
   const qrisPaymentBoxEl = document.getElementById('qrisPaymentBox');
+  const qrisImageEl = document.getElementById('qrisImage');
   const uangBayarFieldEl = document.getElementById('uangBayarField');
   const kembalianFieldEl = document.getElementById('kembalianField');
   const detailStrukRows = document.getElementById('detailStrukRows');
@@ -102,6 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
   let sumberTransaksi = 'kasir';
   let toastTimer;
   let sheetSyncTimer;
+  const QRIS_IMAGE_SRC = 'assets/qris-barcode-only.jpeg';
 
   const formatRupiah = (angka) =>
     new Intl.NumberFormat('id-ID', {
@@ -564,6 +566,18 @@ document.addEventListener('DOMContentLoaded', function () {
   function isMetodeQris() {
     return isTransaksiWeb() || metodeBayarEl.value === 'QRIS';
   }
+
+  function pastikanGambarQris() {
+    if (!qrisImageEl) return;
+
+    if (!qrisImageEl.getAttribute('src') || qrisImageEl.getAttribute('src') !== QRIS_IMAGE_SRC) {
+      qrisImageEl.setAttribute('src', QRIS_IMAGE_SRC);
+    }
+
+    qrisImageEl.loading = 'eager';
+    qrisImageEl.decoding = 'sync';
+  }
+
   function sinkronkanModePembayaran() {
     const transaksiWeb = isTransaksiWeb();
     const summary = getRingkasanBelanja();
@@ -582,6 +596,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (qrisPaymentBoxEl) {
+      if (pembayaranQris) {
+        pastikanGambarQris();
+      }
+
       qrisPaymentBoxEl.hidden = !pembayaranQris;
     }
 
@@ -977,12 +995,125 @@ document.addEventListener('DOMContentLoaded', function () {
     tampilkanToast(cetak ? 'Struk siap dicetak.' : 'Transaksi selesai dan tersimpan.');
 
     if (cetak) {
-      window.setTimeout(() => {
-        window.print();
-      }, 500);
+      cetakStrukKhusus();
     }
 
     resetTransaksi();
+  }
+
+  function cetakStrukKhusus() {
+    const strukEl = document.getElementById('struk');
+    if (!strukEl) {
+      window.print();
+      return;
+    }
+
+    const printWindow = window.open('', '_blank', 'width=420,height=720');
+    if (!printWindow) {
+      tampilkanToast('Izinkan popup di Safari iPad, lalu tekan Cetak Struk lagi.');
+      window.print();
+      return;
+    }
+
+    const strukHTML = strukEl.outerHTML;
+    printWindow.document.open();
+    printWindow.document.write(`<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cetak Struk</title>
+  <style>
+    @page { size: 58mm auto; margin: 1.5mm; }
+    * { box-sizing: border-box; }
+    html, body {
+      width: 58mm;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+      font-family: "Courier New", monospace;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .struk {
+      display: block !important;
+      width: 48mm;
+      max-width: 48mm;
+      margin: 0 auto;
+      padding: 2mm 0;
+      font-size: 10px;
+      line-height: 1.12;
+      color: #000;
+    }
+    .struk-header { text-align: center; margin-bottom: 1mm; }
+    .struk-logo-img {
+      display: block;
+      width: 36mm;
+      max-width: 36mm;
+      height: auto;
+      margin: 0 auto 1mm;
+    }
+    .struk-title {
+      margin: 0 0 0.5mm;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .struk p { margin: 0.4mm 0; }
+    .struk-label { font-size: 9px; }
+    .struk hr {
+      border: 0;
+      border-top: 1px dashed #000;
+      margin: 2mm 0;
+    }
+    .thick { border-top: 2px solid #000 !important; }
+    .item-line {
+      display: flex;
+      gap: 1mm;
+      justify-content: space-between;
+      margin: 0.8mm 0;
+      font-size: 9px;
+    }
+    .item-line > div:nth-child(1) { flex: 1.6; overflow-wrap: anywhere; }
+    .item-line > div:nth-child(2) { flex: 1.1; font-size: 8px; }
+    .item-line .right { flex: 1; text-align: right; font-weight: 700; }
+    .struk-summary p {
+      display: flex;
+      justify-content: space-between;
+      gap: 2mm;
+      font-size: 9px;
+    }
+    .struk-summary .grand { font-size: 10px; font-weight: 700; }
+    .num { text-align: right; font-weight: 700; }
+    .struk-footer { margin-top: 2mm; text-align: center; }
+    .struk-footer p { font-size: 9px; }
+    .spacer-panjang { height: 12mm; }
+    @media screen {
+      body {
+        width: min(100%, 420px);
+        margin: 0 auto;
+        padding: 12px 0;
+      }
+      .struk {
+        border: 1px solid #ddd;
+      }
+    }
+  </style>
+</head>
+<body>
+  ${strukHTML}
+  <script>
+    window.addEventListener('load', function () {
+      window.focus();
+      setTimeout(function () {
+        window.print();
+      }, 250);
+    });
+  <\/script>
+</body>
+</html>`);
+    printWindow.document.close();
   }
 
   function buatNomorTransaksi() {
@@ -1298,6 +1429,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   initSheetConfig();
+  pastikanGambarQris();
   muatProfil();
   muatTransaksiAktif();
   sinkronkanModePembayaran();
